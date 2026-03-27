@@ -6,7 +6,7 @@ import { KpiCards } from "./kpi-cards";
 import { CategoryPieChart, DailyBarChart } from "./charts";
 import { RecentLogs } from "./recent-logs";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Settings } from "lucide-react";
+import { Clock, Users, Settings, UserCog } from "lucide-react";
 import {
   getKpiData,
   getCategoryBreakdown,
@@ -63,10 +63,10 @@ export default async function DashboardPage() {
             </Link>
             {profile?.role === "admin" && (
               <>
-                <Link href="/dashboard/members">
+                <Link href="/dashboard/settings/staff">
                   <Button size="sm" variant="outline" className="rounded-full">
-                    <Users className="mr-1.5 h-4 w-4" />
-                    <span className="hidden sm:inline">メンバー</span>
+                    <UserCog className="mr-1.5 h-4 w-4" />
+                    <span className="hidden sm:inline">スタッフ</span>
                   </Button>
                 </Link>
                 <Link href="/dashboard/settings/categories">

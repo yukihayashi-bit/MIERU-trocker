@@ -23,9 +23,10 @@ export default function SignupPage() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-xl">新規登録</CardTitle>
+        <CardTitle className="text-xl">病院の新規登録</CardTitle>
         <CardDescription>
-          病院の情報と管理者アカウントを作成します
+          病院と管理者アカウントを作成します。<br />
+          登録後に病院コードが自動発行されます。
         </CardDescription>
       </CardHeader>
 
@@ -55,9 +56,9 @@ export default function SignupPage() {
             )}
           </div>
 
-          {/* 氏名 */}
+          {/* 管理者氏名 */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="name">氏名</Label>
+            <Label htmlFor="name">管理者氏名</Label>
             <Input
               id="name"
               name="name"
@@ -73,7 +74,7 @@ export default function SignupPage() {
             )}
           </div>
 
-          {/* メール */}
+          {/* メールアドレス */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email">メールアドレス</Label>
             <Input
@@ -89,6 +90,9 @@ export default function SignupPage() {
                 {state.fieldErrors.email}
               </p>
             )}
+            <p className="text-xs text-muted-foreground">
+              サポート連絡やパスワードリセットに使用します
+            </p>
           </div>
 
           {/* パスワード */}
@@ -111,14 +115,14 @@ export default function SignupPage() {
           </div>
 
           <Button type="submit" className="w-full" size="lg" disabled={isPending}>
-            {isPending ? "登録中..." : "アカウントを作成"}
+            {isPending ? "登録中..." : "病院を登録する"}
           </Button>
         </form>
       </CardContent>
 
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
-          すでにアカウントをお持ちですか？{" "}
+          すでに登録済みの方は{" "}
           <Link href="/login" className="text-primary underline underline-offset-4 hover:text-primary/80">
             ログイン
           </Link>
