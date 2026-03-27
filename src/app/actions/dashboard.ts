@@ -119,10 +119,10 @@ export async function getKpiData(): Promise<KpiData> {
     0
   );
 
-  // 今月のカテゴリ別集計 → トップ
+  // 今月のカテゴリ別集計 → トップ（tenant_categories 参照）
   const { data: catLogs } = await supabase
     .from("time_logs")
-    .select("duration_seconds, task_categories(name)")
+    .select("duration_seconds, tenant_categories(name)")
     .eq("tenant_id", tenantId)
     .gte("start_time", monthStart)
     .not("end_time", "is", null)
@@ -131,7 +131,7 @@ export async function getKpiData(): Promise<KpiData> {
   const catMap = new Map<string, number>();
   for (const log of catLogs ?? []) {
     const catName =
-      (log.task_categories as unknown as { name: string } | null)?.name ?? "不明";
+      (log.tenant_categories as unknown as { name: string } | null)?.name ?? "不明";
     catMap.set(catName, (catMap.get(catName) ?? 0) + (log.duration_seconds ?? 0));
   }
 
@@ -157,7 +157,7 @@ export async function getCategoryBreakdown(): Promise<CategoryBreakdown[]> {
 
   const { data } = await supabase
     .from("time_logs")
-    .select("duration_seconds, task_categories(name)")
+    .select("duration_seconds, tenant_categories(name)")
     .eq("tenant_id", tenantId)
     .gte("start_time", monthStart)
     .not("end_time", "is", null)
@@ -166,7 +166,7 @@ export async function getCategoryBreakdown(): Promise<CategoryBreakdown[]> {
   const catMap = new Map<string, number>();
   for (const log of data ?? []) {
     const catName =
-      (log.task_categories as unknown as { name: string } | null)?.name ?? "不明";
+      (log.tenant_categories as unknown as { name: string } | null)?.name ?? "不明";
     catMap.set(catName, (catMap.get(catName) ?? 0) + (log.duration_seconds ?? 0));
   }
 
@@ -181,7 +181,6 @@ export async function getDailyTotals(): Promise<DailyTotal[]> {
   const tenantId = await getMyTenantId();
   if (!tenantId) return [];
 
-  // 7日前のJST 00:00
   const now = new Date();
   const jstNow = new Date(now.getTime() + JST_OFFSET_MS);
   const sevenDaysAgo = new Date(
@@ -196,10 +195,7 @@ export async function getDailyTotals(): Promise<DailyTotal[]> {
     .gte("start_time", startUtc)
     .not("end_time", "is", null);
 
-  // 日ごとの集計
   const dayMap = new Map<string, number>();
-
-  // 7日分の枠を初期化
   for (let i = 6; i >= 0; i--) {
     const d = new Date(
       Date.UTC(jstNow.getUTCFullYear(), jstNow.getUTCMonth(), jstNow.getUTCDate() - i)
@@ -229,7 +225,7 @@ export async function getRecentLogs(): Promise<RecentLog[]> {
 
   const { data, error } = await supabase
     .from("time_logs")
-    .select("id, start_time, end_time, duration_seconds, users(name), task_categories(name)")
+    .select("id, start_time, end_time, duration_seconds, users(name), tenant_categories(name)")
     .eq("tenant_id", tenantId)
     .not("end_time", "is", null)
     .not("category_id", "is", null)
@@ -246,7 +242,7 @@ export async function getRecentLogs(): Promise<RecentLog[]> {
     userName:
       (log.users as unknown as { name: string } | null)?.name ?? "不明",
     categoryName:
-      (log.task_categories as unknown as { name: string } | null)?.name ?? "不明",
+      (log.tenant_categories as unknown as { name: string } | null)?.name ?? "不明",
     startTime: toJstTimeString(log.start_time),
     endTime: log.end_time ? toJstTimeString(log.end_time) : "-",
     durationSeconds: log.duration_seconds ?? 0,

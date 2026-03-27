@@ -2,66 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { seedTenantCategories, getActiveTenantCategories } from "./categories";
 
-// ─── 標準カテゴリの初期データ ─────────────────────────────
-const STANDARD_CATEGORIES = [
-  "バイタル測定",
-  "清潔ケア",
-  "与薬・注射",
-  "食事介助",
-  "排泄介助",
-  "記録",
-  "巡視",
-  "カンファレンス",
-  "患者対応・ナースコール",
-  "移動・搬送",
-  "その他",
-];
-
-/**
- * 標準カテゴリが1件もなければ、service_role で初期投入する。
- * ページロード時にサーバー側で呼び出す。
- */
-export async function seedStandardCategories() {
-  const supabase = await createClient();
-
-  // 標準カテゴリの件数を確認
-  const { count } = await supabase
-    .from("task_categories")
-    .select("*", { count: "exact", head: true })
-    .eq("is_standard", true);
-
-  if (count && count > 0) return; // 既に存在する
-
-  // service_role でバイパスして INSERT
-  const adminClient = createAdminClient();
-
-  const rows = STANDARD_CATEGORIES.map((name) => ({
-    name,
-    is_standard: true,
-    tenant_id: null,
-  }));
-
-  await adminClient.from("task_categories").insert(rows);
-}
-
-// ─── カテゴリ取得 ────────────────────────────────────────
-export async function getCategories() {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("task_categories")
-    .select("id, name")
-    .order("name");
-
-  if (error) {
-    console.error("カテゴリ取得エラー:", error.message);
-    return [];
-  }
-
-  return data ?? [];
-}
+// ─── Re-export（tracker page から呼べるように） ─────────
+export { seedTenantCategories, getActiveTenantCategories };
 
 // ─── 打刻開始 ────────────────────────────────────────────
 export type StartResult =
@@ -99,7 +43,6 @@ export async function startTracking(): Promise<StartResult> {
     const now = new Date().toISOString();
 
     // category_id は終了時に設定するため、INSERT から除外
-    // （NOT NULL 制約や FK 制約がある場合に null で失敗するのを防ぐ）
     const { data, error: insertError } = await supabase
       .from("time_logs")
       .insert({
@@ -173,7 +116,7 @@ export async function stopTracking(
   return { success: true };
 }
 
-// ─── 今日の履歴取得 ──────────────────────────────────────
+// ─── 今日の履歴取得（レベル2カテゴリ対応） ──────────────
 export async function getTodayLogs() {
   const supabase = await createClient();
 
@@ -193,7 +136,7 @@ export async function getTodayLogs() {
 
   const { data, error } = await supabase
     .from("time_logs")
-    .select("id, start_time, end_time, duration_seconds, task_categories(name)")
+    .select("id, start_time, end_time, duration_seconds, tenant_categories(name, color)")
     .eq("user_id", user.id)
     .gte("start_time", todayStartUtc)
     .not("end_time", "is", null)

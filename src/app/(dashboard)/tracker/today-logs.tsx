@@ -8,7 +8,7 @@ interface LogEntry {
   start_time: string;
   end_time: string | null;
   duration_seconds: number | null;
-  task_categories: { name: string } | { name: string }[] | null;
+  tenant_categories: { name: string; color: string } | { name: string; color: string }[] | null;
 }
 
 interface TodayLogsProps {
@@ -65,13 +65,24 @@ export function TodayLogs({ logs }: TodayLogsProps) {
                 key={log.id}
                 className="flex items-center gap-3 rounded-xl bg-muted/50 px-4 py-3"
               >
-                <Tag className="h-4 w-4 shrink-0 text-muted-foreground" />
+                {(() => {
+                  const tc = log.tenant_categories;
+                  const color = tc
+                    ? Array.isArray(tc) ? tc[0]?.color : tc.color
+                    : "#9ca3af";
+                  return (
+                    <span
+                      className="h-4 w-4 shrink-0 rounded-full"
+                      style={{ backgroundColor: color ?? "#9ca3af" }}
+                    />
+                  );
+                })()}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
-                    {log.task_categories
-                      ? Array.isArray(log.task_categories)
-                        ? log.task_categories[0]?.name ?? "未分類"
-                        : log.task_categories.name
+                    {log.tenant_categories
+                      ? Array.isArray(log.tenant_categories)
+                        ? log.tenant_categories[0]?.name ?? "未分類"
+                        : log.tenant_categories.name
                       : "未分類"}
                   </p>
                   <p className="text-xs text-muted-foreground">

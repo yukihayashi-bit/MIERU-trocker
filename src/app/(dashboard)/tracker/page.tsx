@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
-  seedStandardCategories,
-  getCategories,
+  seedTenantCategories,
+  getActiveTenantCategories,
   getTodayLogs,
   getActiveLog,
 } from "@/app/actions/tracker";
@@ -22,12 +22,12 @@ export default async function TrackerPage() {
     redirect("/login");
   }
 
-  // 標準カテゴリの初期投入（必要な場合のみ）
-  await seedStandardCategories();
+  // テナントカテゴリの初期投入（必要な場合のみ）
+  await seedTenantCategories();
 
   // 並列でデータ取得
   const [categories, todayLogs, activeLog] = await Promise.all([
-    getCategories(),
+    getActiveTenantCategories(),
     getTodayLogs(),
     getActiveLog(),
   ]);

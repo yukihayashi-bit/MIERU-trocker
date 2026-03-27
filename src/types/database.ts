@@ -19,6 +19,27 @@ export interface User {
   created_at: string;
 }
 
+// ─── レベル1: 全テナント共通マスターカテゴリ ─────────────
+export interface MasterCategory {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+// ─── レベル2: テナント独自カテゴリ ───────────────────────
+export interface TenantCategory {
+  id: string;
+  tenant_id: string;
+  master_category_id: string;
+  name: string;
+  color: string;
+  is_active: boolean;
+  created_at: string;
+  // JOIN 時に付与
+  master_categories?: MasterCategory;
+}
+
+// ─── 旧テーブル（後方互換） ──────────────────────────────
 export interface TaskCategory {
   id: string;
   name: string;
@@ -31,7 +52,7 @@ export interface TimeLog {
   id: string;
   user_id: string;
   tenant_id: string;
-  category_id: string;
+  category_id: string | null;
   start_time: string;
   end_time: string | null;
   duration_seconds: number | null;

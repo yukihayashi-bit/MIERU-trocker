@@ -4,13 +4,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { startTracking, stopTracking } from "@/app/actions/tracker";
-import { CategoryDialog } from "./category-dialog";
+import { CategoryDialog, type GroupedCategory } from "./category-dialog";
 import { Play, Square, AlertCircle } from "lucide-react";
 
-type Category = { id: string; name: string };
-
 interface TimerDisplayProps {
-  categories: Category[];
+  categories: GroupedCategory[];
   initialActiveLog: { id: string; startTime: string } | null;
 }
 
