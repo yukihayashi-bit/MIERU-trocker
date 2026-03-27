@@ -31,21 +31,26 @@ export default async function CategoriesPage() {
     getTenantCategories(),
   ]);
 
-  // マスターカテゴリごとにグループ化
+  // マスターカテゴリごとにグループ化（sort_order でソート）
   type TC = (typeof tenantCategories)[number];
-  const grouped = new Map<string, { masterName: string; items: TC[] }>();
+  const grouped = new Map<string, { masterName: string; sortOrder: number; items: TC[] }>();
   for (const cat of tenantCategories) {
     const mcRaw = cat.master_categories;
     const mc = mcRaw
       ? Array.isArray(mcRaw) ? mcRaw[0] : mcRaw
       : null;
     const masterName = (mc as { name: string } | null)?.name ?? "その他";
+    const sortOrder = (mc as { sort_order?: number } | null)?.sort_order ?? 999;
     const masterId = cat.master_category_id;
     if (!grouped.has(masterId)) {
-      grouped.set(masterId, { masterName, items: [] });
+      grouped.set(masterId, { masterName, sortOrder, items: [] });
     }
     grouped.get(masterId)!.items.push(cat);
   }
+
+  const sortedGroups = Array.from(grouped.entries()).sort(
+    (a, b) => a[1].sortOrder - b[1].sortOrder
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
@@ -83,7 +88,7 @@ export default async function CategoriesPage() {
             </CardContent>
           </Card>
         ) : (
-          Array.from(grouped.entries()).map(([masterId, group]) => (
+          sortedGroups.map(([masterId, group]) => (
             <Card key={masterId}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">

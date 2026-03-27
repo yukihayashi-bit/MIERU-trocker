@@ -12,12 +12,14 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 
 // ─── tenant_categories + master_categories JOIN の型 ─────
+type MasterRef = { id: string; name: string; sort_order?: number | null };
+
 export interface GroupedCategory {
   id: string;
   name: string;
   color: string;
   master_category_id: string;
-  master_categories: { id: string; name: string } | { id: string; name: string }[] | null;
+  master_categories: MasterRef | MasterRef[] | null;
 }
 
 interface CategoryDialogProps {
@@ -36,19 +38,24 @@ export function CategoryDialog({
   const [selected, setSelected] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // マスターカテゴリごとにグループ化
-  const grouped = new Map<string, { masterName: string; items: GroupedCategory[] }>();
+  // マスターカテゴリごとにグループ化（sort_order でソート）
+  const grouped = new Map<string, { masterName: string; sortOrder: number; items: GroupedCategory[] }>();
   for (const cat of categories) {
     const mc = cat.master_categories;
-    const masterName = mc
-      ? (Array.isArray(mc) ? mc[0]?.name : mc.name) ?? "その他"
-      : "その他";
+    const resolved = mc ? (Array.isArray(mc) ? mc[0] : mc) : null;
+    const masterName = resolved?.name ?? "その他";
+    const sortOrder = resolved?.sort_order ?? 999;
     const masterId = cat.master_category_id;
     if (!grouped.has(masterId)) {
-      grouped.set(masterId, { masterName, items: [] });
+      grouped.set(masterId, { masterName, sortOrder, items: [] });
     }
     grouped.get(masterId)!.items.push(cat);
   }
+
+  // sort_order 昇順でソート
+  const sortedGroups = Array.from(grouped.entries()).sort(
+    (a, b) => a[1].sortOrder - b[1].sortOrder
+  );
 
   const handleSave = async () => {
     if (!selected) return;
@@ -77,7 +84,7 @@ export function CategoryDialog({
 
         {/* マスターカテゴリごとにグループ表示 */}
         <div className="max-h-[55vh] overflow-y-auto space-y-4 py-2">
-          {Array.from(grouped.entries()).map(([masterId, group]) => (
+          {sortedGroups.map(([masterId, group]) => (
             <div key={masterId}>
               <p className="mb-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 {group.masterName}

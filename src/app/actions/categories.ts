@@ -10,8 +10,8 @@ export async function getMasterCategories() {
 
   const { data, error } = await supabase
     .from("master_categories")
-    .select("id, name, description")
-    .order("name");
+    .select("id, name, description, sort_order")
+    .order("sort_order");
 
   if (error) {
     console.error("マスターカテゴリ取得エラー:", error.message);
@@ -38,7 +38,7 @@ export async function getTenantCategories() {
 
   const { data, error } = await supabase
     .from("tenant_categories")
-    .select("id, tenant_id, master_category_id, name, color, is_active, created_at, master_categories(id, name, description)")
+    .select("id, tenant_id, master_category_id, name, color, is_active, created_at, master_categories(id, name, description, sort_order)")
     .eq("tenant_id", profile.tenant_id)
     .order("name");
 
@@ -67,7 +67,7 @@ export async function getActiveTenantCategories() {
 
   const { data, error } = await supabase
     .from("tenant_categories")
-    .select("id, name, color, master_category_id, master_categories(id, name)")
+    .select("id, name, color, master_category_id, master_categories(id, name, sort_order)")
     .eq("tenant_id", profile.tenant_id)
     .eq("is_active", true)
     .order("name");
@@ -197,7 +197,7 @@ export async function seedTenantCategories() {
   const { data: masters } = await supabase
     .from("master_categories")
     .select("id, name")
-    .order("name");
+    .order("sort_order");
 
   if (!masters || masters.length === 0) return;
 
@@ -209,9 +209,9 @@ export async function seedTenantCategories() {
       { name: "与薬・注射", color: "#ec4899" },
       { name: "食事介助", color: "#f59e0b" },
       { name: "排泄介助", color: "#a855f7" },
+      { name: "患者対応・ナースコール", color: "#06b6d4" },
     ],
     "間接ケア": [
-      { name: "患者対応・ナースコール", color: "#06b6d4" },
       { name: "移動・搬送", color: "#14b8a6" },
       { name: "巡視", color: "#3b82f6" },
     ],
