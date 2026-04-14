@@ -115,7 +115,7 @@ export async function signup(
     return { error: `ユーザー情報の保存に失敗しました: ${userError.message}` };
   }
 
-  redirect("/dashboard");
+  redirect("/tenants");
 }
 
 // ─── ログイン（ハイブリッド：メール or 病院コード+スタッフID）

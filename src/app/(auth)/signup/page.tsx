@@ -23,10 +23,16 @@ export default function SignupPage() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-xl">病院の新規登録</CardTitle>
+        <div className="mx-auto mb-2 rounded-md bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+          メディヴァ社内専用
+        </div>
+        <CardTitle className="text-xl">病院アカウント発行</CardTitle>
         <CardDescription>
-          病院と管理者アカウントを作成します。<br />
-          登録後に病院コードが自動発行されます。
+          新しい病院とその管理者アカウントを発行します。
+          <br />
+          登録すると 8桁の病院コードが自動生成され、
+          <br />
+          病院側スタッフはそのコードでアプリにログインできます。
         </CardDescription>
       </CardHeader>
 
@@ -72,16 +78,19 @@ export default function SignupPage() {
                 {state.fieldErrors.name}
               </p>
             )}
+            <p className="text-xs text-muted-foreground">
+              病院側の管理者として登録されます
+            </p>
           </div>
 
           {/* メールアドレス */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">メールアドレス</Label>
+            <Label htmlFor="email">管理者メールアドレス</Label>
             <Input
               id="email"
               name="email"
               type="email"
-              placeholder="admin@example.com"
+              placeholder="admin@hospital.example.com"
               required
               aria-invalid={!!state.fieldErrors?.email}
             />
@@ -91,13 +100,13 @@ export default function SignupPage() {
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              サポート連絡やパスワードリセットに使用します
+              病院側管理者がログインに使用するメールアドレスです
             </p>
           </div>
 
           {/* パスワード */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="password">パスワード</Label>
+            <Label htmlFor="password">初期パスワード</Label>
             <Input
               id="password"
               name="password"
@@ -112,19 +121,24 @@ export default function SignupPage() {
                 {state.fieldErrors.password}
               </p>
             )}
+            <p className="text-xs text-muted-foreground">
+              発行後、病院側管理者にこのパスワードを通知してください
+            </p>
           </div>
 
           <Button type="submit" className="w-full" size="lg" disabled={isPending}>
-            {isPending ? "登録中..." : "病院を登録する"}
+            {isPending ? "発行中..." : "病院アカウントを発行する"}
           </Button>
         </form>
       </CardContent>
 
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
-          すでに登録済みの方は{" "}
-          <Link href="/login" className="text-primary underline underline-offset-4 hover:text-primary/80">
-            ログイン
+          <Link
+            href="/tenants"
+            className="text-primary underline underline-offset-4 hover:text-primary/80"
+          >
+            発行済みテナント一覧へ
           </Link>
         </p>
       </CardFooter>
